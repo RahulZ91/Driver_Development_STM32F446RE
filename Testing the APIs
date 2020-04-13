@@ -1,0 +1,48 @@
+// The code is used to press the User button for the Nucleo board and to toggle the LED(LD2)
+/*
+ * 001LED_Toggle.c
+ *
+ *  Created on: 13-Apr-2020
+ *      Author: Rahul
+ */
+
+#include "stmf446xx.h"
+#define BTN_PRESSED 0
+void delay(void)
+{
+	for(uint32_t i=0;i<500000;i++);
+}
+int main(void)
+{
+	GPIO_Handle gpioLED,gpioBtn;
+	gpioLED.pGPIOx=GPIOA; // select the port connected to the User LED
+	// Configuration of the pin for LED
+	gpioLED.GPIO_PinConfigSet.GPIO_PinNumber=GPIO_PIN_NO_5; // select the pin connected to the LED
+	gpioLED.GPIO_PinConfigSet.GPIO_PinMode=GPIO_MODE_OUT; // set the pin mode to output
+	gpioLED.GPIO_PinConfigSet.GPIO_PinSpeed=GPIO_SPEED_FAST;// set the speed to fast
+	gpioLED.GPIO_PinConfigSet.GPIO_PinOPType=GPIO_OP_TYPE_PP;// set output type to Pushpull ie the default mode
+	gpioLED.GPIO_PinConfigSet.GPIO_PuPdControl=GPIO_OP_TYPE_PP;// no pushpull registers activated
+
+	PClockControl(GPIOA,ENABLE); // enables the peripheral clock for GPIO Port A
+	GPIO_Init(&gpioLED);
+
+	// Configuration for the User button
+	gpioBtn.pGPIOx=GPIOC;// Button at port c pin 13
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinNumber=GPIO_PIN_NO_13;
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinMode=GPIO_MODE_IN;	// Input since it is to be pressed
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinSpeed=GPIO_SPEED_FAST;
+	gpioBtn.GPIO_PinConfigSet.GPIO_PuPdControl=GPIO_OP_TYPE_PP;
+
+
+	// Toggle the pin
+	while(1)
+	{
+		if((GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13)) == BTN_PRESSED)
+		{
+			delay();
+			GPIO_TogglePin(GPIOA,GPIO_PIN_NO_5);
+
+		}
+	}
+	return 0;
+}
