@@ -1,0 +1,50 @@
+// Toggle the LED on PD5 for an interrupt triggered by the falling edge
+
+#include "STM32F446RExx.h"
+#include<string.h>
+
+#define BTN_PRESSED 0
+void delay(void)
+{
+	for(uint32_t i=0;i<500000;i++);
+}
+int main(void)
+{
+	GPIO_Handle gpioLED,gpioBtn;
+  
+  memset(&gpioLED,0,sizeof(gpioLED)); // memset(<address>,0,sizeof(<structure>) // initialises all the members of the structure to 0
+  memset(&gpioBtn,0,sizeof(gpioLED)); // memset prevents initialisation to garbage values
+  
+	gpioLED.pGPIOx=GPIOA; // select the port connected to LED on board(user LED)
+	// Configuration of the pin for LED
+	gpioLED.GPIO_PinConfigSet.GPIO_PinNumber=GPIO_PIN_NO_5; // select the pin connected to the LED
+	gpioLED.GPIO_PinConfigSet.GPIO_PinMode=GPIO_MODE_OUT; // set the pin mode to output
+	gpioLED.GPIO_PinConfigSet.GPIO_PinSpeed=GPIO_SPEED_FAST;// set the speed to fast
+	gpioLED.GPIO_PinConfigSet.GPIO_PinOPType=GPIO_OP_TYPE_PP;// set output type to Pushpull ie the default mode
+	gpioLED.GPIO_PinConfigSet.GPIO_PuPdControl=GPIO_NO_PUPD;// no pushpull registers activated
+
+	PClockControl(GPIOD,ENABLE); // enables the peripheral clock for GPIO Port A
+	GPIO_Init(&gpioLED);
+	
+	// Configuration for the User button
+	gpioBtn.pGPIOx=GPIOD;// Button at port D pin 5
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinNumber=GPIO_PIN_NO_5;
+  gpioBtn.GPIO_PinConfigSet.GPIO_PinMode=GPIO_MODE_OUT; // set the pin mode to output
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinMode=GPIO_MODE_IT_FT;	// Interrupt with falling edge
+	gpioBtn.GPIO_PinConfigSet.GPIO_PinSpeed=GPIO_SPEED_FAST; 
+	gpioBtn.GPIO_PinConfigSet.GPIO_PuPdControl=GPIO_PIN_PU; // Pull up configuration
+	
+  // IRQ enable for pin 5 Port D
+  GPIO_IRQConfig(IRQ_NO_EXTI9_5,ENABLE)
+
+	// Implement the ISR
+  
+	return 0;
+}
+
+void EXTI9_5_IRQHandler (void)
+{
+  delay(); // counters de-bouncing of the button
+  GPIO_IRQHandling(GPIO_PIN_NO_5);
+  GPIO_TogglePin(GPIOA,GPIO_PIN_NO_5);
+}
