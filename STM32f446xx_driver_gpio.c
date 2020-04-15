@@ -321,7 +321,7 @@ void GPIO_TogglePin(GPIO_RegDef *pGPIOx,uint8_t pinNumber)
  *
  * Returns:     No value returned
  */
-void GPIO_IRQConfig(uint8_t IRQ_Number,uint8_t IRQ_Priority,uint8_t EnorDi)
+void GPIO_IRQConfig(uint8_t IRQ_Number,uint8_t EnorDi)
 {
 	if (EnorDi==ENABLE) // if EnorDi is ENABLE then set the priority hence configure the ISER(Interrupt Set Register)
 	{
@@ -362,6 +362,15 @@ void GPIO_IRQConfig(uint8_t IRQ_Number,uint8_t IRQ_Priority,uint8_t EnorDi)
 	
 }
 	
+void GPIO_IRQ_IT_Config(uint8_t IRQ_Number,uint8_t IRQ_Priority)
+{
+	// 1. Find out the required IPR
+	uint8_t iprx,iprx_section;
+	iprx=IRQ_Number/ 4; // returns the required IPR register (0 -59)
+	iprx_section=IRQ_Number %4 ;// returns the section in the IPR regsiter(0-3)
+	uint8_t shift_amount=(8 * iprx_section - NO_PR_BITS_IMPLEMENTED);
+	*(DRV_BASEADDR_PR + (iprx)) |= (IRQ_Priority << shift_amount); // iprx increments by 4 in HEX
+}
 	// Config IRQ number
 // IRQ Handle
 
@@ -376,5 +385,12 @@ void GPIO_IRQConfig(uint8_t IRQ_Number,uint8_t IRQ_Priority,uint8_t EnorDi)
  * Returns:       No value returned
  */
 void GPIO_IRQHandling(uint8_t pinNumber)
-{}// from which pin the interrupt is triggered is entered via parameter ie the pinNumber
+{
+	// API to handle the Interrupt Service Routine
+	// 1. Clear the bit corresponding to the IRQ number in the Pending Register
+	if(EXTI->PR & (1<<pinNumber))
+	{
+		EXTI->PR |=(1<<pinNumber); // clear  the Pending Register by setting the bit
+	}
+}// from which pin the interrupt is triggered is entered via parameter ie the pinNumber
 
