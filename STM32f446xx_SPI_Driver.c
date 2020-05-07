@@ -172,12 +172,26 @@ void SPI_PeripheralControl(SPI_RegDef *pSPIx,uint8_t EnorDi)
 {
 	if(EnorDi==ENABLE)
 	{
-		pSPIx->CR1 |=(1<<SPI_CR_SPE);
+		pSPIx->CR1 |=(1<<SPI_CR1_SPE);
 	}
 	else
 	{
-		pSPIx->CR1 &= ~(1<<SPI_CR_SPE);
+		pSPIx->CR1 &= ~(1<<SPI_CR1_SPE);
 	}
 
 }
+
+void SPI_SSIControl(SPI_RegDef *pSPIx,uint8_t EnorDi)
+{
+	if(EnorDi==ENABLE)
+	{
+		pSPIx->CR1 |=(1<<SPI_CR1_SSI);
+	}
+	else
+	{
+		pSPIx->CR1 &= ~(1<<SPI_CR1_SSI);
+	}
+
+}
+
 
